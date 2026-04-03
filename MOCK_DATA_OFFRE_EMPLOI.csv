@@ -1,0 +1,11 @@
+id_offre,intitule,taux_horaire,heures_mensuel,type_contrat,date_debut,date_fin,statut,date_fermeture,id_entreprise,id_salarie
+1,Senior Quality Engineer,17.14,70,Alternance,2025-08-08,,ouverte,,2,5
+2,Help Desk Operator,12.65,70,Stage,2025-05-13,2025-09-19,fermée,,3,2
+3,Desktop Support Technician,24.48,70,Alternance,2025-11-09,2025-07-19,ouverte,,1,3
+4,Health Coach IV,20.25,151.67,Alternance,2026-02-15,,fermée,2025-09-07,3,4
+5,Food Chemist,40.9,151.67,CDD,2025-05-11,2025-09-10,ouverte,,4,4
+6,Structural Engineer,14.57,70,CDI,2025-11-19,,ouverte,2025-07-26,3,3
+7,Compensation Analyst,27.89,160,CDI,2025-11-10,,fermée,,5,4
+8,Analog Circuit Design manager,35.72,70,CDI,2025-12-10,,ouverte,,4,3
+9,Engineer I,35.54,70,Alternance,2025-09-12,2025-04-29,fermée,,4,3
+10,Nurse,41.16,151.67,CDI,2026-01-09,,ouverte,2025-09-29,2,2
