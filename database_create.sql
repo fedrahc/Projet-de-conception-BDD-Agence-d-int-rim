@@ -1,68 +1,40 @@
--- MySQL Workbench Forward Engineering
-
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
--- -----------------------------------------------------
--- Schema mydb
--- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `mydb` ;
+DROP SCHEMA IF EXISTS `mydb`;
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8;
+USE `mydb`;
 
--- -----------------------------------------------------
--- Schema mydb
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
-USE `mydb` ;
-
--- -----------------------------------------------------
--- Table `mydb`.`PERSONNE`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`PERSONNE` (
   `id_personne` INT NOT NULL,
   `nom` VARCHAR(45) NOT NULL,
   `prenom` VARCHAR(45) NOT NULL,
   `date_naissance` DATE NOT NULL,
   `adresse` VARCHAR(45) NULL,
-  `téléphone` VARCHAR(45) NULL,
+  `telephone` VARCHAR(45) NULL,
   `email` VARCHAR(45) NULL,
   PRIMARY KEY (`id_personne`))
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`ENTREPRISE`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`ENTREPRISE` (
   `id_entreprise` INT NOT NULL,
   `nom` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id_entreprise`))
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`COMPETENCE`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`COMPETENCE` (
   `id_competence` INT NOT NULL,
   `libelle` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id_competence`))
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`METIER`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`METIER` (
   `id_metier` INT NOT NULL,
   `libelle` VARCHAR(45) NOT NULL,
   PRIMARY KEY (`id_metier`))
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`SALARIE`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`SALARIE` (
   `id_salarie` INT NOT NULL,
   `role` VARCHAR(45) NOT NULL,
@@ -76,10 +48,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`SALARIE` (
     ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`CANDIDAT`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT` (
   `id_candidat` INT NOT NULL,
   `description` VARCHAR(45) NULL,
@@ -97,10 +65,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT` (
 )
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`OFFRE_EMPLOI`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI` (
   `id_offre` INT NOT NULL,
   `intitule` VARCHAR(45) NOT NULL,
@@ -119,17 +83,17 @@ CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI` (
   CONSTRAINT `fk_OFFRE_EMPLOI_ENTREPRISE`
     FOREIGN KEY (`ENTREPRISE_id_entreprise`)
     REFERENCES `mydb`.`ENTREPRISE` (`id_entreprise`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_OFFRE_EMPLOI_SALARIE1`
     FOREIGN KEY (`SALARIE_id_salarie`)
     REFERENCES `mydb`.`SALARIE` (`id_salarie`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT chk_statut 
-    CHECK (statut IN ('ouverte', 'fermée')),
+    CHECK (statut IN ('ouverte', 'fermee')),
   CONSTRAINT chk_type_contrat_offre 
-    CHECK (type_contrat IN ('CDI', 'CDD', 'stage', 'bénévolat', 'alternance')),
+    CHECK (type_contrat IN ('CDI', 'CDD', 'stage', 'benevolat', 'alternance')),
   CONSTRAINT chk_taux_horaire 
     CHECK (taux_horaire > 0),
   CONSTRAINT chk_heures_mensuel 
@@ -137,9 +101,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI` (
 )
 ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `mydb`.`DIPLOME`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`DIPLOME` (
   `id_diplome` INT NOT NULL,
   `libelle` VARCHAR(45) NOT NULL,
@@ -150,14 +111,10 @@ CREATE TABLE IF NOT EXISTS `mydb`.`DIPLOME` (
   CONSTRAINT `fk_DIPLOME_CANDIDAT1`
     FOREIGN KEY (`CANDIDAT_id_candidat`)
     REFERENCES `mydb`.`CANDIDAT` (`id_candidat`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`EXPERIENCE_PRO`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`EXPERIENCE_PRO` (
   `id_experience` INT NOT NULL,
   `type_contrat` VARCHAR(45) NOT NULL,
@@ -169,16 +126,13 @@ CREATE TABLE IF NOT EXISTS `mydb`.`EXPERIENCE_PRO` (
   CONSTRAINT `fk_EXPERIENCE_PRO_CANDIDAT1`
     FOREIGN KEY (`CANDIDAT_id_candidat`)
     REFERENCES `mydb`.`CANDIDAT` (`id_candidat`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT chk_type_contrat_exp 
-    CHECK (type_contrat IN ('CDI', 'CDD', 'stage', 'bénévolat', 'alternance'))
+    CHECK (type_contrat IN ('CDI', 'CDD', 'stage', 'benevolat', 'alternance'))
 )
 ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `mydb`.`CANDIDATURE`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDATURE` (
   `statut_candidature` INT NOT NULL,
   `CANDIDAT_id_candidat` INT NOT NULL,
@@ -188,22 +142,18 @@ CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDATURE` (
   CONSTRAINT `fk_CANDIDATURE_CANDIDAT1`
     FOREIGN KEY (`CANDIDAT_id_candidat`)
     REFERENCES `mydb`.`CANDIDAT` (`id_candidat`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_CANDIDATURE_OFFRE_EMPLOI1`
     FOREIGN KEY (`OFFRE_EMPLOI_id_offre`)
     REFERENCES `mydb`.`OFFRE_EMPLOI` (`id_offre`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
   CONSTRAINT chk_statut_candidature 
     CHECK (statut_candidature IN (0, 1, 2))
 )
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`CANDIDAT_METIER`
--- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT_METIER` (
   `CANDIDAT_id_candidat` INT NOT NULL,
   `METIER_id_metier` INT NOT NULL,
@@ -221,11 +171,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT_METIER` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`CANDIDAT_has_COMPETENCE`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT_has_COMPETENCE` (
+CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT_COMPETENCE` (
   `CANDIDAT_id_candidat` INT NOT NULL,
   `COMPETENCE_id_competence` INT NOT NULL,
   PRIMARY KEY (`CANDIDAT_id_candidat`, `COMPETENCE_id_competence`),
@@ -234,8 +180,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT_has_COMPETENCE` (
   CONSTRAINT `fk_CANDIDAT_has_COMPETENCE_CANDIDAT1`
     FOREIGN KEY (`CANDIDAT_id_candidat`)
     REFERENCES `mydb`.`CANDIDAT` (`id_candidat`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_CANDIDAT_has_COMPETENCE_COMPETENCE1`
     FOREIGN KEY (`COMPETENCE_id_competence`)
     REFERENCES `mydb`.`COMPETENCE` (`id_competence`)
@@ -243,11 +189,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`CANDIDAT_has_COMPETENCE` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`OFFRE_EMPLOI_has_COMPETENCE`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_has_COMPETENCE` (
+CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_COMPETENCE` (
   `OFFRE_EMPLOI_id_offre` INT NOT NULL,
   `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` INT NOT NULL,
   `COMPETENCE_id_competence` INT NOT NULL,
@@ -257,8 +199,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_has_COMPETENCE` (
   CONSTRAINT `fk_OFFRE_EMPLOI_has_COMPETENCE_OFFRE_EMPLOI1`
     FOREIGN KEY (`OFFRE_EMPLOI_id_offre` , `OFFRE_EMPLOI_ENTREPRISE_id_entreprise`)
     REFERENCES `mydb`.`OFFRE_EMPLOI` (`id_offre` , `ENTREPRISE_id_entreprise`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_OFFRE_EMPLOI_has_COMPETENCE_COMPETENCE1`
     FOREIGN KEY (`COMPETENCE_id_competence`)
     REFERENCES `mydb`.`COMPETENCE` (`id_competence`)
@@ -266,11 +208,7 @@ CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_has_COMPETENCE` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
--- -----------------------------------------------------
--- Table `mydb`.`OFFRE_EMPLOI_has_METIER`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_has_METIER` (
+CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_METIER` (
   `OFFRE_EMPLOI_id_offre` INT NOT NULL,
   `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` INT NOT NULL,
   `METIER_id_metier` INT NOT NULL,
@@ -280,8 +218,8 @@ CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_has_METIER` (
   CONSTRAINT `fk_OFFRE_EMPLOI_has_METIER_OFFRE_EMPLOI1`
     FOREIGN KEY (`OFFRE_EMPLOI_id_offre` , `OFFRE_EMPLOI_ENTREPRISE_id_entreprise`)
     REFERENCES `mydb`.`OFFRE_EMPLOI` (`id_offre` , `ENTREPRISE_id_entreprise`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION,
+    ON DELETE RESTRICT
+    ON UPDATE CASCADE,
   CONSTRAINT `fk_OFFRE_EMPLOI_has_METIER_METIER1`
     FOREIGN KEY (`METIER_id_metier`)
     REFERENCES `mydb`.`METIER` (`id_metier`)
@@ -289,8 +227,6 @@ CREATE TABLE IF NOT EXISTS `mydb`.`OFFRE_EMPLOI_has_METIER` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
-
