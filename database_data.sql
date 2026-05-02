@@ -106,10 +106,10 @@ COMMIT;
 -- -----------------------------------------------------
 START TRANSACTION;
 INSERT INTO OFFRE_EMPLOI VALUES (1, 'Senior Quality Engineer', 17.14, 70, '2025-08-08', NULL, 'ouverte', 'alternance', NULL, 1, 2);
-INSERT INTO OFFRE_EMPLOI VALUES (2, 'Help Desk Operator', 1.65, 70, '2025-05-13', '2025-09-19', 'fermée', 'stage', '2025-09-19', 2, 3);
+INSERT INTO OFFRE_EMPLOI VALUES (2, 'Help Desk Operator', 16.5, 70, '2025-05-13', '2025-09-19', 'fermée', 'stage', '2025-09-19', 2, 3);
 INSERT INTO OFFRE_EMPLOI VALUES (3, 'Desktop Support Technician', 24.48, 70, '2025-11-09', '2025-07-19', 'ouverte', 'alternance', NULL, 3, 1);
 INSERT INTO OFFRE_EMPLOI VALUES (4, 'Health Coach IV', 20.25, 152, '2026-02-15', NULL, 'fermée', 'alternance', '2025-09-07', 4, 3);
-INSERT INTO OFFRE_EMPLOI VALUES (5, 'Food Chemist', 4.09, 152, '2025-05-11', '2025-09-10', 'ouverte', 'CDD', NULL, 5, 4);
+INSERT INTO OFFRE_EMPLOI VALUES (5, 'Food Chemist', 40.9, 152, '2025-05-11', '2025-09-10', 'ouverte', 'CDD', NULL, 5, 4);
 INSERT INTO OFFRE_EMPLOI VALUES (6, 'Structural Engineer', 14.57, 70, '2025-11-19', NULL, 'ouverte', 'CDI', NULL, 1, 3);
 INSERT INTO OFFRE_EMPLOI VALUES (7, 'Compensation Analyst', 27.89, 160, '2025-11-10', NULL, 'fermée', 'CDI', '2025-11-10', 2, 5);
 INSERT INTO OFFRE_EMPLOI VALUES (8, 'Analog Circuit Design Manager', 3572, 70, '2025-12-10', NULL, 'ouverte', 'CDI', NULL, 3, 4);
