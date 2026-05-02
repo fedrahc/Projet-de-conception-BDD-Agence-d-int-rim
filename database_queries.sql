@@ -71,6 +71,41 @@ GROUP BY c.id_candidat, p.nom, p.prenom
 --si il est égal aux nbr d'offre emploi que le candidat a candidater
 HAVING COUNT(DISTINCT cand.OFFRE_EMPLOI_id_offre) = (SELECT COUNT(*) FROM OFFRE_EMPLOI);
 
+
+-- Requête 4 : Calculer la somme des commissions perçues par l'agence
+-- (toutes périodes confondues)
+SELECT SUM(taux_horaire * heures_mensuel * 0.10) AS total_commissions
+FROM OFFRE_EMPLOI;
+
+-- Requête 5 : Même chose que la 4, mais groupée par mois
+
+SELECT
+    YEAR(date_debut)  AS annee,
+    MONTH(date_debut) AS mois,
+    SUM(taux_horaire * heures_mensuel * 0.10) AS commissions_mois
+FROM OFFRE_EMPLOI
+GROUP BY YEAR(date_debut), MONTH(date_debut)
+ORDER BY annee, mois;
+
+-- Requête 6 : Commissions par salarié (et non par agence)
+-- Chaque salarié est responsable des offres qu'il gère
+-- On joint OFFRE_EMPLOI -> SALARIE -> PERSONNE pour avoir les noms
+
+SELECT
+    p.nom,
+    p.prenom,
+    s.role,
+    SUM(o.taux_horaire * o.heures_mensuel * 0.10) AS commission_salarie
+FROM OFFRE_EMPLOI o
+JOIN SALARIE s
+    ON o.SALARIE_id_salarie = s.id_salarie
+JOIN PERSONNE p
+    ON s.PERSONNE_id_personne = p.id_personne
+GROUP BY s.id_salarie, p.nom, p.prenom, s.role
+ORDER BY commission_salarie DESC;
+
+
+
 --7. Lister les compétences qui ne sont pas rattachées à des candidats 
 SELECT comp.id_competence, comp.libelle
 FROM COMPETENCE comp
@@ -97,3 +132,54 @@ WHERE ohc.OFFRE_EMPLOI_id_offre = 1 -- l'id de l'offre d'emploi donnée = 1
         FROM CANDIDATURE 
         WHERE OFFRE_EMPLOI_id_offre = 1
 );
+
+
+-- Requête 9 : Ajouter les candidatures pour les candidats listés en requête 8
+-- On crée d'abord une VUE basée sur la requête 8 (candidats potentiels),
+-- puis on insère directement depuis cette vue.
+-- Ainsi aucun identifiant n'est listé manuellement.- Étape 1 : créer la vue des candidats potentiels pour l'offre 1
+CREATE OR REPLACE VIEW vue_candidats_potentiels AS
+SELECT DISTINCT c.id_candidat
+FROM CANDIDAT c
+JOIN CANDIDAT_COMPETENCE chc
+    ON c.id_candidat = chc.CANDIDAT_id_candidat
+JOIN OFFRE_EMPLOI_COMPETENCE ohc
+    ON chc.COMPETENCE_id_competence = ohc.COMPETENCE_id_competence
+WHERE ohc.OFFRE_EMPLOI_id_offre = 1
+AND   ohc.OFFRE_EMPLOI_ENTREPRISE_id_entreprise = 1
+AND   c.id_candidat NOT IN (
+    SELECT CANDIDAT_id_candidat
+    FROM CANDIDATURE
+    WHERE OFFRE_EMPLOI_id_offre = 1
+);
+
+-- Étape 2 : insérer les candidatures depuis la vue
+INSERT INTO CANDIDATURE (statut_candidature, CANDIDAT_id_candidat, OFFRE_EMPLOI_id_offre)
+SELECT 0, id_candidat, 1
+FROM vue_candidats_potentiels;
+
+
+
+
+
+-- Requête 10 : Fermer une offre d'emploi et l'attribuer à un candidat
+
+-- Étape 1 : fermer l'offre
+UPDATE OFFRE_EMPLOI
+SET statut = 'fermee',
+    date_fermeture = CURDATE()
+WHERE id_offre = 1;
+
+-- Étape 2 : accepter le candidat retenu
+UPDATE CANDIDATURE
+SET statut_candidature = 2
+WHERE OFFRE_EMPLOI_id_offre = 1
+AND   CANDIDAT_id_candidat  = 1;
+
+-- Étape 3 : refuser les autres candidats de cette offre
+UPDATE CANDIDATURE
+SET statut_candidature = 1
+WHERE OFFRE_EMPLOI_id_offre = 1
+AND   CANDIDAT_id_candidat != 1;
+
+
