@@ -109,7 +109,7 @@ ORDER BY commission_salarie DESC;
 -- 7. Lister les compétences qui ne sont pas rattachées à des candidats 
 SELECT comp.id_competence, comp.libelle
 FROM COMPETENCE comp
-LEFT JOIN CANDIDAT_HAS_COMPETENCE chc 
+LEFT JOIN CANDIDAT_has_COMPETENCE chc 
     ON comp.id_competence = chc.COMPETENCE_id_competence
 WHERE chc.CANDIDAT_id_candidat IS NULL;
 
@@ -121,9 +121,9 @@ SELECT DISTINCT c.id_candidat, p.nom, p.prenom
 FROM CANDIDAT c
 JOIN PERSONNE p 
     ON c.PERSONNE_id_personne = p.id_personne
-JOIN CANDIDAT_HAS_COMPETENCE chc   
+JOIN CANDIDAT_has_COMPETENCE chc   
     ON c.id_candidat = chc.CANDIDAT_id_candidat
-JOIN OFFRE_EMPLOI_HAS_COMPETENCE ohc 
+JOIN OFFRE_EMPLOI_has_COMPETENCE ohc 
     ON chc.COMPETENCE_id_competence = ohc.COMPETENCE_id_competence
 WHERE ohc.OFFRE_EMPLOI_id_offre = 1 -- l'id de l'offre d'emploi donnée = 1
 -- ici c'est pour filtrer les candidats qui ont déjà candidater + qui match les compétences
