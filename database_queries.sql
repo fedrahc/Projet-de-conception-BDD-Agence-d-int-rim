@@ -143,7 +143,7 @@ SELECT DISTINCT c.id_candidat
 FROM CANDIDAT c
 JOIN CANDIDAT_has_COMPETENCE chc
     ON c.id_candidat = chc.CANDIDAT_id_candidat
-JOIN OFFRE_EMPLOI_COMPETENCE ohc
+JOIN OFFRE_EMPLOI_has_COMPETENCE ohc
     ON chc.COMPETENCE_id_competence = ohc.COMPETENCE_id_competence
 WHERE ohc.OFFRE_EMPLOI_id_offre = 1
 AND   ohc.OFFRE_EMPLOI_ENTREPRISE_id_entreprise = 1
@@ -153,11 +153,9 @@ AND   c.id_candidat NOT IN (
     WHERE OFFRE_EMPLOI_id_offre = 1
 );
 
--- Étape 2 : insérer les candidatures depuis la vue
 INSERT INTO CANDIDATURE (statut_candidature, CANDIDAT_id_candidat, OFFRE_EMPLOI_id_offre)
 SELECT 0, id_candidat, 1
 FROM vue_candidats_potentiels;
-
 
 
 
