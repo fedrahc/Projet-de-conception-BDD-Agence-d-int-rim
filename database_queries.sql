@@ -1,5 +1,5 @@
 -- 1. Une liste des candidats et des offres auxquelles ils ont postulées. 
-SELECT p.nom, p.prenom, o.intule AS offre_postule 
+SELECT p.nom, p.prenom, o.intitule AS offre_postule 
 -- pour la liste on prend juste le nom et prénom, on doit passer par PERSONNE 
 -- et les offres que les titres en passant par candidature 
 -- pour vérifier ceux qui ont postulées, et pas toutes les offres
