@@ -68,7 +68,7 @@ JOIN CANDIDATURE cand
     ON c.id_candidat = cand.CANDIDAT_id_candidat
 GROUP BY c.id_candidat, p.nom, p.prenom
 -- le having count compte le nbre total d'offre et match 
---si il est égal aux nbr d'offre emploi que le candidat a candidater
+-- si il est égal aux nbr d'offre emploi que le candidat a candidater
 HAVING COUNT(DISTINCT cand.OFFRE_EMPLOI_id_offre) = (SELECT COUNT(*) FROM OFFRE_EMPLOI);
 
 
