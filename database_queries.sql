@@ -39,7 +39,7 @@ WHERE CANDIDAT_id_candidat = 1;
 -- compétences 
 SELECT comp.libelle
 FROM COMPETENCE comp
-JOIN CANDIDAT_HAS_COMPETENCE chc 
+JOIN CANDIDAT_has_COMPETENCE chc 
     ON comp.id_competence = chc.COMPETENCE_id_competence
 WHERE chc.CANDIDAT_id_candidat = 1;
 
