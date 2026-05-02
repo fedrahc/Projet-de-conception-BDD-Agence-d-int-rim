@@ -141,7 +141,7 @@ WHERE ohc.OFFRE_EMPLOI_id_offre = 1 -- l'id de l'offre d'emploi donnée = 1
 CREATE OR REPLACE VIEW vue_candidats_potentiels AS
 SELECT DISTINCT c.id_candidat
 FROM CANDIDAT c
-JOIN CANDIDAT_COMPETENCE chc
+JOIN CANDIDAT_has_COMPETENCE chc
     ON c.id_candidat = chc.CANDIDAT_id_candidat
 JOIN OFFRE_EMPLOI_COMPETENCE ohc
     ON chc.COMPETENCE_id_competence = ohc.COMPETENCE_id_competence
