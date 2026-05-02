@@ -1,8 +1,8 @@
---1. Une liste des candidats et des offres auxquelles ils ont postulées. 
+-- 1. Une liste des candidats et des offres auxquelles ils ont postulées. 
 SELECT p.nom, p.prenom, o.intule AS offre_postule 
---pour la liste on prend juste le nom et prénom, on doit passer par PERSONNE 
---et les offres que les titres en passant par candidature 
---pour vérifier ceux qui ont postulées, et pas toutes les offres
+-- pour la liste on prend juste le nom et prénom, on doit passer par PERSONNE 
+-- et les offres que les titres en passant par candidature 
+-- pour vérifier ceux qui ont postulées, et pas toutes les offres
 FROM CANDIDAT c
 JOIN PERSONNE p 
     ON c.PERSONNE_id_personne = p.id_personne
@@ -12,8 +12,8 @@ JOIN OFFRE_EMPLOI o
     ON cand.OFFRE_EMPLOI_id_offre = o.id_offre;
 
 
---2. Proposez une ou plusieurs requêtes pour afficher toutes les informations 
---d’un candidat (Informations personnelles, diplômes, métiers, compétences, offres d’emploi, etc.) 
+-- 2. Proposez une ou plusieurs requêtes pour afficher toutes les informations 
+-- d’un candidat (Informations personnelles, diplômes, métiers, compétences, offres d’emploi, etc.) 
 
 -- ici pour sélectionner le candidat donné on va utiliser 
 -- WHERE c.id_candidat = 1;
@@ -59,7 +59,7 @@ WHERE cm.CANDIDAT_id_candidat = 1;
 
 
 
---3. Lister les candidats qui ont postulé à toutes les offres d’emploi 
+-- 3. Lister les candidats qui ont postulé à toutes les offres d’emploi 
 SELECT c.id_candidat, p.nom, p.prenom
 FROM CANDIDAT c
 JOIN PERSONNE p 
@@ -106,7 +106,7 @@ ORDER BY commission_salarie DESC;
 
 
 
---7. Lister les compétences qui ne sont pas rattachées à des candidats 
+-- 7. Lister les compétences qui ne sont pas rattachées à des candidats 
 SELECT comp.id_competence, comp.libelle
 FROM COMPETENCE comp
 LEFT JOIN CANDIDAT_HAS_COMPETENCE chc 
@@ -114,9 +114,9 @@ LEFT JOIN CANDIDAT_HAS_COMPETENCE chc
 WHERE chc.CANDIDAT_id_candidat IS NULL;
 
 
---8. Lister les candidats potentiels (qui n’ont pas encore candidaté) 
---pour une offre d’emploi donnée (c.à.d les candidats qui sont liés 
---aux métiers ou compétences requises par l’offre d’emploi) 
+-- 8. Lister les candidats potentiels (qui n’ont pas encore candidaté) 
+-- pour une offre d’emploi donnée (c.à.d les candidats qui sont liés 
+-- aux métiers ou compétences requises par l’offre d’emploi) 
 SELECT DISTINCT c.id_candidat, p.nom, p.prenom
 FROM CANDIDAT c
 JOIN PERSONNE p 
