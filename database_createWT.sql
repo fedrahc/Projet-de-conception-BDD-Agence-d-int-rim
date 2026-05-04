@@ -1,4 +1,3 @@
-USE mydb;
 -- MySQL Workbench Forward Engineering
 
 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
@@ -8,10 +7,19 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 -- -----------------------------------------------------
 -- Schema mydb
 -- -----------------------------------------------------
+DROP SCHEMA IF EXISTS `mydb` ;
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
+USE `mydb` ;
 
 -- -----------------------------------------------------
 -- Table `PERSONNE`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `PERSONNE` ;
+
 CREATE TABLE IF NOT EXISTS `PERSONNE` (
   `id_personne` INT NOT NULL,
   `nom` VARCHAR(45) NOT NULL,
@@ -27,6 +35,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `ENTREPRISE`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `ENTREPRISE` ;
+
 CREATE TABLE IF NOT EXISTS `ENTREPRISE` (
   `id_entreprise` INT NOT NULL,
   `nom` VARCHAR(45) NOT NULL,
@@ -37,6 +47,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `COMPETENCE`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `COMPETENCE` ;
+
 CREATE TABLE IF NOT EXISTS `COMPETENCE` (
   `id_competence` INT NOT NULL,
   `libelle` VARCHAR(45) NOT NULL,
@@ -47,6 +59,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `METIER`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `METIER` ;
+
 CREATE TABLE IF NOT EXISTS `METIER` (
   `id_metier` INT NOT NULL,
   `libelle` VARCHAR(45) NOT NULL,
@@ -57,6 +71,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `SALARIE`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `SALARIE` ;
+
 CREATE TABLE IF NOT EXISTS `SALARIE` (
   `id_salarie` INT NOT NULL,
   `role` VARCHAR(45) NOT NULL,
@@ -74,6 +90,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `CANDIDAT`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `CANDIDAT` ;
+
 CREATE TABLE IF NOT EXISTS `CANDIDAT` (
   `id_candidat` INT NOT NULL,
   `description` VARCHAR(45) NULL,
@@ -92,6 +110,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `OFFRE_EMPLOI`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `OFFRE_EMPLOI` ;
+
 CREATE TABLE IF NOT EXISTS `OFFRE_EMPLOI` (
   `id_offre` INT NOT NULL,
   `intitule` VARCHAR(45) NOT NULL,
@@ -123,6 +143,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `DIPLOME`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `DIPLOME` ;
+
 CREATE TABLE IF NOT EXISTS `DIPLOME` (
   `id_diplome` INT NOT NULL,
   `libelle` VARCHAR(45) NOT NULL,
@@ -141,6 +163,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `EXPERIENCE_PRO`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `EXPERIENCE_PRO` ;
+
 CREATE TABLE IF NOT EXISTS `EXPERIENCE_PRO` (
   `id_experience` INT NOT NULL,
   `type_contrat` VARCHAR(45) NOT NULL,
@@ -160,6 +184,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `CANDIDATURE`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `CANDIDATURE` ;
+
 CREATE TABLE IF NOT EXISTS `CANDIDATURE` (
   `statut_candidature` INT NOT NULL,
   `CANDIDAT_id_candidat` INT NOT NULL,
@@ -182,6 +208,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `CANDIDAT_METIER`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `CANDIDAT_METIER` ;
+
 CREATE TABLE IF NOT EXISTS `CANDIDAT_METIER` (
   `CANDIDAT_id_candidat` INT NOT NULL,
   `METIER_id_metier` INT NOT NULL,
@@ -203,6 +231,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `CANDIDAT_has_COMPETENCE`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `CANDIDAT_has_COMPETENCE` ;
+
 CREATE TABLE IF NOT EXISTS `CANDIDAT_has_COMPETENCE` (
   `CANDIDAT_id_candidat` INT NOT NULL,
   `COMPETENCE_id_competence` INT NOT NULL,
@@ -225,6 +255,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `OFFRE_EMPLOI_has_COMPETENCE`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `OFFRE_EMPLOI_has_COMPETENCE` ;
+
 CREATE TABLE IF NOT EXISTS `OFFRE_EMPLOI_has_COMPETENCE` (
   `OFFRE_EMPLOI_id_offre` INT NOT NULL,
   `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` INT NOT NULL,
@@ -248,6 +280,8 @@ ENGINE = InnoDB;
 -- -----------------------------------------------------
 -- Table `OFFRE_EMPLOI_has_METIER`
 -- -----------------------------------------------------
+DROP TABLE IF EXISTS `OFFRE_EMPLOI_has_METIER` ;
+
 CREATE TABLE IF NOT EXISTS `OFFRE_EMPLOI_has_METIER` (
   `OFFRE_EMPLOI_id_offre` INT NOT NULL,
   `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` INT NOT NULL,
@@ -267,12 +301,17 @@ CREATE TABLE IF NOT EXISTS `OFFRE_EMPLOI_has_METIER` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+USE `mydb` ;
 
 -- -----------------------------------------------------
 -- procedure update_disponibilite
 -- -----------------------------------------------------
 
+USE `mydb`;
+DROP procedure IF EXISTS `update_disponibilite`;
+
 DELIMITER $$
+USE `mydb`$$
 CREATE PROCEDURE `update_disponibilite` ()
 BEGIN
     -- Règle 6 : Changer le statut des candidats à "disponible" si leur emploi est terminé
@@ -291,8 +330,13 @@ BEGIN
 END$$
 
 DELIMITER ;
+USE `mydb`;
 
 DELIMITER $$
+
+USE `mydb`$$
+DROP TRIGGER IF EXISTS `CANDIDAT_BEFORE_INSERT` $$
+USE `mydb`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`CANDIDAT_BEFORE_INSERT` BEFORE INSERT ON `CANDIDAT` FOR EACH ROW
 BEGIN
 DECLARE age_candidat INT;
@@ -307,6 +351,10 @@ DECLARE age_candidat INT;
     END IF;
 END$$
 
+
+USE `mydb`$$
+DROP TRIGGER IF EXISTS `CANDIDAT_BEFORE_DELETE` $$
+USE `mydb`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`CANDIDAT_BEFORE_DELETE` BEFORE DELETE ON `CANDIDAT` FOR EACH ROW
 BEGIN
 -- Règle 3 : Conservation des données non personnelles (Archive)
@@ -323,12 +371,20 @@ BEGIN
     SET MESSAGE_TEXT = 'Action bloquée : Données personnelles effacées (Archive conservée).';
 END$$
 
+
+USE `mydb`$$
+DROP TRIGGER IF EXISTS `OFFRE_EMPLOI_BEFORE_DELETE` $$
+USE `mydb`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`OFFRE_EMPLOI_BEFORE_DELETE` BEFORE DELETE ON `OFFRE_EMPLOI` FOR EACH ROW
 BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Suppression interdite : une offre d emploi ne peut pas être supprimée, uniquement archivée.';
 END$$
 
+
+USE `mydb`$$
+DROP TRIGGER IF EXISTS `OFFRE_EMPLOI_BEFORE_UPDATE` $$
+USE `mydb`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`OFFRE_EMPLOI_BEFORE_UPDATE` BEFORE UPDATE ON `OFFRE_EMPLOI` FOR EACH ROW
 BEGIN
    IF OLD.statut = 'ouverte' AND NEW.statut = 'fermee' THEN
@@ -336,6 +392,10 @@ BEGIN
    END IF;
 END$$
 
+
+USE `mydb`$$
+DROP TRIGGER IF EXISTS `CANDIDATURE_BEFORE_UPDATE` $$
+USE `mydb`$$
 CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`CANDIDATURE_BEFORE_UPDATE`
 BEFORE UPDATE ON CANDIDATURE
 FOR EACH ROW
@@ -379,3 +439,4 @@ DELIMITER ;
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
