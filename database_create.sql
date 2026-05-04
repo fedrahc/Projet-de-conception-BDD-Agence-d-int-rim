@@ -130,3 +130,6 @@ create table OFFRE_EMPLOI_has_METIER (
         on delete cascade on update cascade,
     foreign key (METIER_id_metier) references METIER(id_metier)
         on delete no action on update no action);
+
+
+-- Triggers --
