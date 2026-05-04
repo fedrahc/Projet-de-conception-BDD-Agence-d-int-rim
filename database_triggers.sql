@@ -57,7 +57,7 @@ WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 1;
 -- (C'EST ICI QUE ÇA DOIT PLANTER avec le message "Ce candidat n'est pas disponible")
 UPDATE CANDIDATURE 
 SET statut_candidature = 2 
-WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 3;
+WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 3; -- ATTENTION ici il n'y a pas de message d'erreur
 
 
 -- ------------------------------------------------------------------------------
@@ -76,7 +76,7 @@ WHERE CANDIDAT_id_candidat = 3 AND OFFRE_EMPLOI_id_offre = 5;
 UPDATE CANDIDATURE
 SET statut_candidature = 2
 WHERE CANDIDAT_id_candidat = 5 AND OFFRE_EMPLOI_id_offre = 5;
-
+-- IL N'Y A PAS D'ERREUR ici 
 
 -- ------------------------------------------------------------------------------
 -- RÈGLE 6 : Routine qui change le statut des candidats à disponible si leur emploi est terminé.
