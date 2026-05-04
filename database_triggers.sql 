@@ -5,6 +5,24 @@
 -- Test contrainte 1 : essayer de supprimer une offre -> doit échouer
 -- Résultat attendu : Error Code 1644 - Suppression interdite
 DELETE FROM OFFRE_EMPLOI WHERE id_offre = 1;
+
+
+-- Test contrainte 2 : fermer une offre -> date_fermeture doit se remplir automatiquement
+-- Avant : vérifier que date_fermeture est NULL
+
+SELECT id_offre, statut, date_fermeture FROM OFFRE_EMPLOI WHERE id_offre = 3;
+ 
+-- Fermer l'offre (sans mettre date_fermeture manuellement)
+
+UPDATE OFFRE_EMPLOI SET statut = 'fermee' WHERE id_offre = 3;
+ 
+-- Après : date_fermeture doit être la date du jour automatiquement
+
+SELECT id_offre, statut, date_fermeture FROM OFFRE_EMPLOI WHERE id_offre = 3;
+ 
+
+
+
  
 -- Test contrainte 5 : essayer d'attribuer une offre déjà obtenue à un autre candidat
 -- D'abord on accepte le candidat 1 pour l'offre 2
@@ -16,14 +34,4 @@ WHERE OFFRE_EMPLOI_id_offre = 2 AND CANDIDAT_id_candidat = 1;
 UPDATE CANDIDATURE SET statut_candidature = 2
 WHERE OFFRE_EMPLOI_id_offre = 2 AND CANDIDAT_id_candidat = 5;
  
- 
--- Test contrainte 2 : fermer une offre -> date_fermeture doit se remplir automatiquement
--- Avant : vérifier que date_fermeture est NULL
-SELECT id_offre, statut, date_fermeture FROM OFFRE_EMPLOI WHERE id_offre = 3;
- 
--- Fermer l'offre (sans mettre date_fermeture manuellement)
-UPDATE OFFRE_EMPLOI SET statut = 'fermee' WHERE id_offre = 3;
- 
--- Après : date_fermeture doit être la date du jour automatiquement
-SELECT id_offre, statut, date_fermeture FROM OFFRE_EMPLOI WHERE id_offre = 3;
  
