@@ -1,5 +1,37 @@
 
 -- ------------------------------------------------------------------------------
+-- RÈGLE 1 : Une offre d'emploi ne peut pas être supprimée, uniquement archivée.
+-- TEST : On va tenter de supprimer une offre d'emploi de la base de données.
+-- RESULTAT ATTENDU : Le trigger bloque la suppression avec une erreur.
+-- Message : "Suppression interdite : une offre d emploi ne peut pas être supprimée, uniquement archivée (statut fermee)"
+-- ------------------------------------------------------------------------------
+DELETE FROM OFFRE_EMPLOI WHERE id_offre = 1;
+
+
+-- ------------------------------------------------------------------------------
+-- RÈGLE 2 : Lorsqu'une offre passe de 'ouverte' à 'fermee', la date de fermeture
+-- est enregistrée automatiquement.
+-- TEST : On ferme une offre sans renseigner manuellement la date_fermeture.
+-- RESULTAT ATTENDU : Le trigger remplit automatiquement date_fermeture avec la date du jour.
+-- ------------------------------------------------------------------------------
+-- 1. On vérifie que date_fermeture est NULL avant la fermeture
+SELECT id_offre, statut, date_fermeture
+FROM OFFRE_EMPLOI
+WHERE id_offre = 3;
+ 
+-- 2. On ferme l'offre sans mettre de date_fermeture manuellement
+UPDATE OFFRE_EMPLOI
+SET statut = 'fermee'
+WHERE id_offre = 3;
+ 
+-- 3. On vérifie que date_fermeture a bien été remplie automatiquement avec la date du jour
+SELECT id_offre, statut, date_fermeture
+FROM OFFRE_EMPLOI
+WHERE id_offre = 3;
+
+
+
+-- ------------------------------------------------------------------------------
 -- RÈGLE 3 : Conservation des données non personnelles pour archive (Anonymisation).
 -- TEST : On va tenter de supprimer un candidat de la base de données.
 -- RESULTAT ATTENDU : Le trigger bloque la suppression (Erreur), mais si on fait un SELECT sur la personne, elle est devenue "Anonyme".
@@ -26,6 +58,24 @@ WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 1;
 UPDATE CANDIDATURE 
 SET statut_candidature = 2 
 WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 3;
+
+
+-- ------------------------------------------------------------------------------
+-- RÈGLE 5 : Une candidature ne peut être obtenue si elle a déjà été obtenue par un autre candidat.
+-- TEST : On accepte un candidat pour une offre, puis on essaie d'accepter un autre candidat pour la même offre.
+-- RESULTAT ATTENDU : Le trigger bloque le 2ème UPDATE avec une erreur.
+-- Message : "Erreur (Règle 5) : Cette offre a déjà été obtenue par un autre candidat"
+-- ------------------------------------------------------------------------------
+-- 1. On accepte le candidat 3 pour l'offre 5 (Le trigger laisse passer)
+UPDATE CANDIDATURE
+SET statut_candidature = 2
+WHERE CANDIDAT_id_candidat = 3 AND OFFRE_EMPLOI_id_offre = 5;
+ 
+-- 2. On tente d'accepter le candidat 5 pour la même offre 5
+-- (C'EST ICI QUE CA DOIT PLANTER avec le message "Cette offre a déjà été obtenue par un autre candidat")
+UPDATE CANDIDATURE
+SET statut_candidature = 2
+WHERE CANDIDAT_id_candidat = 5 AND OFFRE_EMPLOI_id_offre = 5;
 
 
 -- ------------------------------------------------------------------------------
