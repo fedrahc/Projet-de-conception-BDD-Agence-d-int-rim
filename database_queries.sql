@@ -20,7 +20,7 @@ JOIN OFFRE_EMPLOI o
 -- avec 1 comme ID qui mimique l'ID du candidat souhaitée
 
 -- en premier les information personelle du client 
-SELECT p.nom, p.prenom, p.email, p.telephone, c.description, c.disponibilite
+SELECT p.nom, p.prenom, p.email, p.téléphone, c.description, c.disponibilite
 FROM CANDIDAT c
 JOIN PERSONNE p 
     ON c.PERSONNE_id_personne = p.id_personne
