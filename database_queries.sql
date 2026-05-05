@@ -58,7 +58,6 @@ JOIN OFFRE_EMPLOI o
 WHERE cand.CANDIDAT_id_candidat = 1;
 
 
-
 -- 3. Lister les candidats qui ont postulé à toutes les offres d’emploi 
 SELECT c.id_candidat, p.nom, p.prenom
 FROM CANDIDAT c
