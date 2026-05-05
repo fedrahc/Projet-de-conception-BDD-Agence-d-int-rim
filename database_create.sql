@@ -184,7 +184,7 @@ BEGIN
     SET nom       = 'Anonyme',
         prenom    = 'Anonyme',
         adresse   = NULL,
-        telephone = NULL,
+        téléphone = NULL,
         email     = NULL
     WHERE id_personne = OLD.PERSONNE_id_personne;
 

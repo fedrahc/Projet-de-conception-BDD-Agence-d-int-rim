@@ -57,7 +57,8 @@ WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 1;
 -- (C'EST ICI QUE ÇA DOIT PLANTER avec le message "Ce candidat n'est pas disponible")
 UPDATE CANDIDATURE 
 SET statut_candidature = 2 
-WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 3; -- ATTENTION ici il n'y a pas de message d'erreur
+WHERE CANDIDAT_id_candidat = 1 AND OFFRE_EMPLOI_id_offre = 2;
+-- Doit échouer : candidat 1 déjà en poste sur offre 1
 
 
 -- ------------------------------------------------------------------------------
@@ -73,10 +74,14 @@ WHERE CANDIDAT_id_candidat = 3 AND OFFRE_EMPLOI_id_offre = 5;
  
 -- 2. On tente d'accepter le candidat 5 pour la même offre 5
 -- (C'EST ICI QUE CA DOIT PLANTER avec le message "Cette offre a déjà été obtenue par un autre candidat")
-UPDATE CANDIDATURE
-SET statut_candidature = 2
-WHERE CANDIDAT_id_candidat = 5 AND OFFRE_EMPLOI_id_offre = 5;
--- IL N'Y A PAS D'ERREUR ici 
+-- Ajouter la candidature si elle n'existe pas
+INSERT INTO CANDIDATURE VALUES (0, 4, 5);
+
+-- Puis essayer de l'accepter -> doit échouer
+UPDATE CANDIDATURE 
+SET statut_candidature = 2 
+WHERE CANDIDAT_id_candidat = 4 AND OFFRE_EMPLOI_id_offre = 5;
+-- Doit échouer : offre 5 déjà obtenue par candidat 3
 
 -- ------------------------------------------------------------------------------
 -- RÈGLE 6 : Routine qui change le statut des candidats à disponible si leur emploi est terminé.
