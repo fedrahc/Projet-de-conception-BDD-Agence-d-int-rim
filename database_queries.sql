@@ -50,7 +50,7 @@ JOIN CANDIDAT_METIER cm
     ON m.id_metier = cm.METIER_id_metier
 WHERE cm.CANDIDAT_id_candidat = 1;
 
--- offres d'emplois (auxquels le candidat a postulé)
+--- offres d'emplois (auxquels le candidat a postulé)
 SELECT o.intitule, o.type_contrat, o.statut, cand.statut_candidature
 FROM CANDIDATURE cand
 JOIN OFFRE_EMPLOI o
