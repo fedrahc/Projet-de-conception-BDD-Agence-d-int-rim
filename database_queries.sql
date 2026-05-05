@@ -51,11 +51,11 @@ JOIN CANDIDAT_METIER cm
 WHERE cm.CANDIDAT_id_candidat = 1;
 
 -- offres d'emplois (auxquels le candidat a postulé)
-SELECT m.libelle
-FROM METIER m
-JOIN CANDIDAT_METIER cm 
-    ON m.id_metier = cm.METIER_id_metier
-WHERE cm.CANDIDAT_id_candidat = 1;
+SELECT o.intitule, o.type_contrat, o.statut, cand.statut_candidature
+FROM CANDIDATURE cand
+JOIN OFFRE_EMPLOI o
+    ON cand.OFFRE_EMPLOI_id_offre = o.id_offre
+WHERE cand.CANDIDAT_id_candidat = 1;
 
 
 
