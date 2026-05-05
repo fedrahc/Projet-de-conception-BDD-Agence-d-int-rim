@@ -1,402 +1,205 @@
--- MySQL Workbench Forward Engineering
+DROP SCHEMA IF EXISTS mydb;
+CREATE SCHEMA mydb DEFAULT CHARACTER SET utf8;
+USE mydb;
 
-SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
-SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
-SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+create table PERSONNE (
+    id_personne      int         not null,
+    nom              varchar(45) not null,
+    prenom           varchar(45) not null,
+    date_naissance   date        not null,
+    adresse          varchar(45),
+    téléphone        varchar(45),
+    email            varchar(45),
+    primary key (id_personne));
 
--- -----------------------------------------------------
--- Schema mydb
--- -----------------------------------------------------
-DROP SCHEMA IF EXISTS `mydb` ;
+create table ENTREPRISE (
+    id_entreprise  int         not null,
+    nom            varchar(45) not null,
+    primary key (id_entreprise));
 
--- -----------------------------------------------------
--- Schema mydb
--- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
-USE `mydb` ;
+create table COMPETENCE (
+    id_competence  int         not null,
+    libelle        varchar(45) not null,
+    primary key (id_competence));
 
--- -----------------------------------------------------
--- Table `PERSONNE`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `PERSONNE` ;
+create table METIER (
+    id_metier  int         not null,
+    libelle    varchar(45) not null,
+    primary key (id_metier));
 
-CREATE TABLE IF NOT EXISTS `PERSONNE` (
-  `id_personne` INT NOT NULL,
-  `nom` VARCHAR(45) NOT NULL,
-  `prenom` VARCHAR(45) NOT NULL,
-  `date_naissance` DATE NOT NULL,
-  `adresse` VARCHAR(45) NULL,
-  `téléphone` VARCHAR(45) NULL,
-  `email` VARCHAR(45) NULL,
-  PRIMARY KEY (`id_personne`))
-ENGINE = InnoDB;
+create table SALARIE (
+    id_salarie           int         not null,
+    `role`               varchar(45) not null,
+    PERSONNE_id_personne int         not null,
+    primary key (id_salarie, PERSONNE_id_personne),
+    foreign key (PERSONNE_id_personne) references PERSONNE(id_personne)
+        on delete cascade on update cascade);
 
+create table CANDIDAT (
+    id_candidat          int         not null,
+    description          varchar(45),
+    disponibilite        varchar(45) not null,
+    PERSONNE_id_personne int         not null,
+    primary key (id_candidat),
+    foreign key (PERSONNE_id_personne) references PERSONNE(id_personne)
+        on delete cascade on update cascade,
+    check (disponibilite in ('disponible', 'indisponible')));
 
--- -----------------------------------------------------
--- Table `ENTREPRISE`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `ENTREPRISE` ;
+create table OFFRE_EMPLOI (
+    id_offre                 int            not null,
+    intitule                 varchar(45)    not null,
+    taux_horaire             decimal(10,2)  not null,
+    heures_mensuel           int            not null,
+    date_debut               date           not null,
+    date_fin                 date,
+    statut                   varchar(45)    not null,
+    type_contrat             varchar(45)    not null,
+    date_fermeture           date,
+    ENTREPRISE_id_entreprise int            not null,
+    SALARIE_id_salarie       int,
+    primary key (id_offre, ENTREPRISE_id_entreprise),
+    foreign key (ENTREPRISE_id_entreprise) references ENTREPRISE(id_entreprise)
+        on delete cascade on update cascade,
+    foreign key (SALARIE_id_salarie) references SALARIE(id_salarie)
+        on delete no action on update no action,
+    check (statut in ('ouverte', 'fermee')),
+    check (type_contrat in ('CDI', 'CDD', 'stage', 'benevolat', 'alternance')),
+    check (taux_horaire > 0),
+    check (heures_mensuel > 0));
 
-CREATE TABLE IF NOT EXISTS `ENTREPRISE` (
-  `id_entreprise` INT NOT NULL,
-  `nom` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id_entreprise`))
-ENGINE = InnoDB;
+create table DIPLOME (
+    id_diplome           int         not null,
+    libelle              varchar(45) not null,
+    niveau_etudes        varchar(45) not null,
+    CANDIDAT_id_candidat int         not null,
+    primary key (id_diplome, CANDIDAT_id_candidat),
+    foreign key (CANDIDAT_id_candidat) references CANDIDAT(id_candidat)
+        on delete cascade on update cascade);
 
+create table EXPERIENCE_PRO (
+    id_experience        int         not null,
+    type_contrat         varchar(45) not null,
+    date_debut           date        not null,
+    date_fin             date,
+    CANDIDAT_id_candidat int         not null,
+    primary key (id_experience, CANDIDAT_id_candidat),
+    foreign key (CANDIDAT_id_candidat) references CANDIDAT(id_candidat)
+        on delete cascade on update cascade,
+    check (type_contrat in ('CDI', 'CDD', 'stage', 'benevolat', 'alternance')));
 
--- -----------------------------------------------------
--- Table `COMPETENCE`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `COMPETENCE` ;
+create table CANDIDATURE (
+    statut_candidature    int not null,
+    CANDIDAT_id_candidat  int not null,
+    OFFRE_EMPLOI_id_offre int not null,
+    primary key (CANDIDAT_id_candidat, OFFRE_EMPLOI_id_offre),
+    foreign key (CANDIDAT_id_candidat) references CANDIDAT(id_candidat)
+        on delete cascade on update cascade,
+    foreign key (OFFRE_EMPLOI_id_offre) references OFFRE_EMPLOI(id_offre)
+        on delete cascade on update cascade,
+    check (statut_candidature in (0, 1, 2)));
 
-CREATE TABLE IF NOT EXISTS `COMPETENCE` (
-  `id_competence` INT NOT NULL,
-  `libelle` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id_competence`))
-ENGINE = InnoDB;
+create table CANDIDAT_METIER (
+    CANDIDAT_id_candidat int not null,
+    METIER_id_metier     int not null,
+    primary key (CANDIDAT_id_candidat, METIER_id_metier),
+    foreign key (CANDIDAT_id_candidat) references CANDIDAT(id_candidat)
+        on delete cascade on update cascade,
+    foreign key (METIER_id_metier) references METIER(id_metier)
+        on delete no action on update no action);
 
+create table CANDIDAT_has_COMPETENCE (
+    CANDIDAT_id_candidat     int not null,
+    COMPETENCE_id_competence int not null,
+    primary key (CANDIDAT_id_candidat, COMPETENCE_id_competence),
+    foreign key (CANDIDAT_id_candidat) references CANDIDAT(id_candidat)
+        on delete cascade on update cascade,
+    foreign key (COMPETENCE_id_competence) references COMPETENCE(id_competence)
+        on delete no action on update no action);
 
--- -----------------------------------------------------
--- Table `METIER`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `METIER` ;
+create table OFFRE_EMPLOI_has_COMPETENCE (
+    OFFRE_EMPLOI_id_offre                 int not null,
+    OFFRE_EMPLOI_ENTREPRISE_id_entreprise int not null,
+    COMPETENCE_id_competence              int not null,
+    primary key (OFFRE_EMPLOI_id_offre, OFFRE_EMPLOI_ENTREPRISE_id_entreprise, COMPETENCE_id_competence),
+    foreign key (OFFRE_EMPLOI_id_offre, OFFRE_EMPLOI_ENTREPRISE_id_entreprise)
+        references OFFRE_EMPLOI(id_offre, ENTREPRISE_id_entreprise)
+        on delete cascade on update cascade,
+    foreign key (COMPETENCE_id_competence) references COMPETENCE(id_competence)
+        on delete no action on update no action);
 
-CREATE TABLE IF NOT EXISTS `METIER` (
-  `id_metier` INT NOT NULL,
-  `libelle` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`id_metier`))
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `SALARIE`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `SALARIE` ;
-
-CREATE TABLE IF NOT EXISTS `SALARIE` (
-  `id_salarie` INT NOT NULL,
-  `role` VARCHAR(45) NOT NULL,
-  `PERSONNE_id_personne` INT NOT NULL,
-  PRIMARY KEY (`id_salarie`, `PERSONNE_id_personne`),
-  INDEX `fk_SALARIE_PERSONNE1_idx` (`PERSONNE_id_personne` ASC) VISIBLE,
-  CONSTRAINT `fk_SALARIE_PERSONNE1`
-    FOREIGN KEY (`PERSONNE_id_personne`)
-    REFERENCES `PERSONNE` (`id_personne`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `CANDIDAT`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `CANDIDAT` ;
-
-CREATE TABLE IF NOT EXISTS `CANDIDAT` (
-  `id_candidat` INT NOT NULL,
-  `description` VARCHAR(45) NULL,
-  `disponibilite` VARCHAR(45) NOT NULL,
-  `PERSONNE_id_personne` INT NOT NULL,
-  PRIMARY KEY (`id_candidat`, `PERSONNE_id_personne`),
-  INDEX `fk_CANDIDAT_PERSONNE1_idx` (`PERSONNE_id_personne` ASC) VISIBLE,
-  CONSTRAINT `fk_CANDIDAT_PERSONNE1`
-    FOREIGN KEY (`PERSONNE_id_personne`)
-    REFERENCES `PERSONNE` (`id_personne`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `OFFRE_EMPLOI`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `OFFRE_EMPLOI` ;
-
-CREATE TABLE IF NOT EXISTS `OFFRE_EMPLOI` (
-  `id_offre` INT NOT NULL,
-  `intitule` VARCHAR(45) NOT NULL,
-  `taux_horaire` DECIMAL NOT NULL,
-  `heures_mensuel` INT NOT NULL,
-  `date_debut` DATE NOT NULL,
-  `date_fin` DATE NULL,
-  `statut` VARCHAR(45) NOT NULL,
-  `type_contrat` VARCHAR(45) NOT NULL,
-  `date_fermeture` DATE NULL,
-  `ENTREPRISE_id_entreprise` INT NOT NULL,
-  `SALARIE_id_salarie` INT NULL,
-  PRIMARY KEY (`id_offre`, `ENTREPRISE_id_entreprise`),
-  INDEX `fk_OFFRE_EMPLOI_ENTREPRISE_idx` (`ENTREPRISE_id_entreprise` ASC) VISIBLE,
-  INDEX `fk_OFFRE_EMPLOI_SALARIE1_idx` (`SALARIE_id_salarie` ASC) VISIBLE,
-  CONSTRAINT `fk_OFFRE_EMPLOI_ENTREPRISE`
-    FOREIGN KEY (`ENTREPRISE_id_entreprise`)
-    REFERENCES `ENTREPRISE` (`id_entreprise`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_OFFRE_EMPLOI_SALARIE1`
-    FOREIGN KEY (`SALARIE_id_salarie`)
-    REFERENCES `SALARIE` (`id_salarie`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `DIPLOME`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `DIPLOME` ;
-
-CREATE TABLE IF NOT EXISTS `DIPLOME` (
-  `id_diplome` INT NOT NULL,
-  `libelle` VARCHAR(45) NOT NULL,
-  `niveau_etudes` VARCHAR(45) NOT NULL,
-  `CANDIDAT_id_candidat` INT NOT NULL,
-  PRIMARY KEY (`id_diplome`, `CANDIDAT_id_candidat`),
-  INDEX `fk_DIPLOME_CANDIDAT1_idx` (`CANDIDAT_id_candidat` ASC) VISIBLE,
-  CONSTRAINT `fk_DIPLOME_CANDIDAT1`
-    FOREIGN KEY (`CANDIDAT_id_candidat`)
-    REFERENCES `CANDIDAT` (`id_candidat`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB;
+create table OFFRE_EMPLOI_has_METIER (
+    OFFRE_EMPLOI_id_offre                 int not null,
+    OFFRE_EMPLOI_ENTREPRISE_id_entreprise int not null,
+    METIER_id_metier                      int not null,
+    primary key (OFFRE_EMPLOI_id_offre, OFFRE_EMPLOI_ENTREPRISE_id_entreprise, METIER_id_metier),
+    foreign key (OFFRE_EMPLOI_id_offre, OFFRE_EMPLOI_ENTREPRISE_id_entreprise)
+        references OFFRE_EMPLOI(id_offre, ENTREPRISE_id_entreprise)
+        on delete cascade on update cascade,
+    foreign key (METIER_id_metier) references METIER(id_metier)
+        on delete no action on update no action);
 
 
--- -----------------------------------------------------
--- Table `EXPERIENCE_PRO`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `EXPERIENCE_PRO` ;
-
-CREATE TABLE IF NOT EXISTS `EXPERIENCE_PRO` (
-  `id_experience` INT NOT NULL,
-  `type_contrat` VARCHAR(45) NOT NULL,
-  `date_debut` DATE NOT NULL,
-  `date_fin` DATE NULL,
-  `CANDIDAT_id_candidat` INT NOT NULL,
-  PRIMARY KEY (`id_experience`, `CANDIDAT_id_candidat`),
-  INDEX `fk_EXPERIENCE_PRO_CANDIDAT1_idx` (`CANDIDAT_id_candidat` ASC) VISIBLE,
-  CONSTRAINT `fk_EXPERIENCE_PRO_CANDIDAT1`
-    FOREIGN KEY (`CANDIDAT_id_candidat`)
-    REFERENCES `CANDIDAT` (`id_candidat`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `CANDIDATURE`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `CANDIDATURE` ;
-
-CREATE TABLE IF NOT EXISTS `CANDIDATURE` (
-  `statut_candidature` INT NOT NULL,
-  `CANDIDAT_id_candidat` INT NOT NULL,
-  `OFFRE_EMPLOI_id_offre` INT NOT NULL,
-  PRIMARY KEY (`CANDIDAT_id_candidat`, `OFFRE_EMPLOI_id_offre`),
-  INDEX `fk_CANDIDATURE_OFFRE_EMPLOI1_idx` (`OFFRE_EMPLOI_id_offre` ASC) VISIBLE,
-  CONSTRAINT `fk_CANDIDATURE_CANDIDAT1`
-    FOREIGN KEY (`CANDIDAT_id_candidat`)
-    REFERENCES `CANDIDAT` (`id_candidat`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_CANDIDATURE_OFFRE_EMPLOI1`
-    FOREIGN KEY (`OFFRE_EMPLOI_id_offre`)
-    REFERENCES `OFFRE_EMPLOI` (`id_offre`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `CANDIDAT_METIER`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `CANDIDAT_METIER` ;
-
-CREATE TABLE IF NOT EXISTS `CANDIDAT_METIER` (
-  `CANDIDAT_id_candidat` INT NOT NULL,
-  `METIER_id_metier` INT NOT NULL,
-  PRIMARY KEY (`CANDIDAT_id_candidat`, `METIER_id_metier`),
-  INDEX `fk_CANDIDAT_METIER_METIER1_idx` (`METIER_id_metier` ASC) VISIBLE,
-  CONSTRAINT `fk_CANDIDAT_METIER_CANDIDAT1`
-    FOREIGN KEY (`CANDIDAT_id_candidat`)
-    REFERENCES `CANDIDAT` (`id_candidat`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_CANDIDAT_METIER_METIER1`
-    FOREIGN KEY (`METIER_id_metier`)
-    REFERENCES `METIER` (`id_metier`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `CANDIDAT_has_COMPETENCE`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `CANDIDAT_has_COMPETENCE` ;
-
-CREATE TABLE IF NOT EXISTS `CANDIDAT_has_COMPETENCE` (
-  `CANDIDAT_id_candidat` INT NOT NULL,
-  `COMPETENCE_id_competence` INT NOT NULL,
-  PRIMARY KEY (`CANDIDAT_id_candidat`, `COMPETENCE_id_competence`),
-  INDEX `fk_CANDIDAT_has_COMPETENCE_COMPETENCE1_idx` (`COMPETENCE_id_competence` ASC) VISIBLE,
-  INDEX `fk_CANDIDAT_has_COMPETENCE_CANDIDAT1_idx` (`CANDIDAT_id_candidat` ASC) VISIBLE,
-  CONSTRAINT `fk_CANDIDAT_has_COMPETENCE_CANDIDAT1`
-    FOREIGN KEY (`CANDIDAT_id_candidat`)
-    REFERENCES `CANDIDAT` (`id_candidat`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_CANDIDAT_has_COMPETENCE_COMPETENCE1`
-    FOREIGN KEY (`COMPETENCE_id_competence`)
-    REFERENCES `COMPETENCE` (`id_competence`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `OFFRE_EMPLOI_has_COMPETENCE`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `OFFRE_EMPLOI_has_COMPETENCE` ;
-
-CREATE TABLE IF NOT EXISTS `OFFRE_EMPLOI_has_COMPETENCE` (
-  `OFFRE_EMPLOI_id_offre` INT NOT NULL,
-  `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` INT NOT NULL,
-  `COMPETENCE_id_competence` INT NOT NULL,
-  PRIMARY KEY (`OFFRE_EMPLOI_id_offre`, `OFFRE_EMPLOI_ENTREPRISE_id_entreprise`, `COMPETENCE_id_competence`),
-  INDEX `fk_OFFRE_EMPLOI_has_COMPETENCE_COMPETENCE1_idx` (`COMPETENCE_id_competence` ASC) VISIBLE,
-  INDEX `fk_OFFRE_EMPLOI_has_COMPETENCE_OFFRE_EMPLOI1_idx` (`OFFRE_EMPLOI_id_offre` ASC, `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` ASC) VISIBLE,
-  CONSTRAINT `fk_OFFRE_EMPLOI_has_COMPETENCE_OFFRE_EMPLOI1`
-    FOREIGN KEY (`OFFRE_EMPLOI_id_offre` , `OFFRE_EMPLOI_ENTREPRISE_id_entreprise`)
-    REFERENCES `OFFRE_EMPLOI` (`id_offre` , `ENTREPRISE_id_entreprise`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_OFFRE_EMPLOI_has_COMPETENCE_COMPETENCE1`
-    FOREIGN KEY (`COMPETENCE_id_competence`)
-    REFERENCES `COMPETENCE` (`id_competence`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-
--- -----------------------------------------------------
--- Table `OFFRE_EMPLOI_has_METIER`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `OFFRE_EMPLOI_has_METIER` ;
-
-CREATE TABLE IF NOT EXISTS `OFFRE_EMPLOI_has_METIER` (
-  `OFFRE_EMPLOI_id_offre` INT NOT NULL,
-  `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` INT NOT NULL,
-  `METIER_id_metier` INT NOT NULL,
-  PRIMARY KEY (`OFFRE_EMPLOI_id_offre`, `OFFRE_EMPLOI_ENTREPRISE_id_entreprise`, `METIER_id_metier`),
-  INDEX `fk_OFFRE_EMPLOI_has_METIER_METIER1_idx` (`METIER_id_metier` ASC) VISIBLE,
-  INDEX `fk_OFFRE_EMPLOI_has_METIER_OFFRE_EMPLOI1_idx` (`OFFRE_EMPLOI_id_offre` ASC, `OFFRE_EMPLOI_ENTREPRISE_id_entreprise` ASC) VISIBLE,
-  CONSTRAINT `fk_OFFRE_EMPLOI_has_METIER_OFFRE_EMPLOI1`
-    FOREIGN KEY (`OFFRE_EMPLOI_id_offre` , `OFFRE_EMPLOI_ENTREPRISE_id_entreprise`)
-    REFERENCES `OFFRE_EMPLOI` (`id_offre` , `ENTREPRISE_id_entreprise`)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT `fk_OFFRE_EMPLOI_has_METIER_METIER1`
-    FOREIGN KEY (`METIER_id_metier`)
-    REFERENCES `METIER` (`id_metier`)
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-USE `mydb` ;
-
--- -----------------------------------------------------
--- procedure update_disponibilite
--- -----------------------------------------------------
-
-USE `mydb`;
-DROP procedure IF EXISTS `update_disponibilite`;
-
-DELIMITER $$
-USE `mydb`$$
-CREATE PROCEDURE `update_disponibilite` ()
-BEGIN
-    -- Règle 6 : Changer le statut des candidats à "disponible" si leur emploi est terminé
-    UPDATE CANDIDAT c
-    SET c.disponibilite = 'disponible'
-    WHERE c.disponibilite = 'indisponible'
-      AND NOT EXISTS (
-          -- On vérifie qu'il n'y a PAS de contrat encore actif pour ce candidat
-          SELECT 1
-          FROM CANDIDATURE cand
-          JOIN OFFRE_EMPLOI o ON cand.OFFRE_EMPLOI_id_offre = o.id_offre
-          WHERE cand.CANDIDAT_id_candidat = c.id_candidat
-            AND cand.statut_candidature = 2 
-            AND (o.date_fin IS NULL OR o.date_fin >= CURDATE())
-      );
-END$$
-
-DELIMITER ;
-USE `mydb`;
+-- ============================================================
+-- TRIGGERS ET PROCEDURE (dans l'ordre des contraintes 1 à 7)
+-- ============================================================
 
 DELIMITER $$
 
-USE `mydb`$$
-DROP TRIGGER IF EXISTS `CANDIDAT_BEFORE_INSERT` $$
-USE `mydb`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`CANDIDAT_BEFORE_INSERT` BEFORE INSERT ON `CANDIDAT` FOR EACH ROW
-BEGIN
-DECLARE age_candidat INT;
-	-- Règle 7 : Vérifier que le candidat a au moins 16 ans
-    SELECT TIMESTAMPDIFF(YEAR, date_naissance, CURDATE()) INTO age_candidat
-    FROM PERSONNE
-    WHERE id_personne = NEW.PERSONNE_id_personne;
-
-    IF age_candidat < 16 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Erreur : Le candidat doit avoir au moins 16 ans.';
-    END IF;
-END$$
-
-
-USE `mydb`$$
-DROP TRIGGER IF EXISTS `CANDIDAT_BEFORE_DELETE` $$
-USE `mydb`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`CANDIDAT_BEFORE_DELETE` BEFORE DELETE ON `CANDIDAT` FOR EACH ROW
-BEGIN
--- Règle 3 : Conservation des données non personnelles (Archive)
-    UPDATE PERSONNE
-    SET nom = 'Anonyme',
-        prenom = 'Anonyme',
-        adresse = NULL,
-        téléphone = NULL,
-        email = NULL
-    WHERE id_personne = OLD.PERSONNE_id_personne;
-
-    -- On bloque la suppression physique de la ligne
-    SIGNAL SQLSTATE '45000'
-    SET MESSAGE_TEXT = 'Action bloquée : Données personnelles effacées (Archive conservée).';
-END$$
-
-
-USE `mydb`$$
-DROP TRIGGER IF EXISTS `OFFRE_EMPLOI_BEFORE_DELETE` $$
-USE `mydb`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`OFFRE_EMPLOI_BEFORE_DELETE` BEFORE DELETE ON `OFFRE_EMPLOI` FOR EACH ROW
+-- ============================================================
+-- Contrainte 1 : Une offre d'emploi ne peut pas être supprimée,
+-- uniquement archivée (statut = fermee)
+-- ============================================================
+CREATE TRIGGER OFFRE_EMPLOI_BEFORE_DELETE
+BEFORE DELETE ON OFFRE_EMPLOI
+FOR EACH ROW
 BEGIN
     SIGNAL SQLSTATE '45000'
     SET MESSAGE_TEXT = 'Suppression interdite : une offre d emploi ne peut pas être supprimée, uniquement archivée.';
 END$$
 
 
-USE `mydb`$$
-DROP TRIGGER IF EXISTS `OFFRE_EMPLOI_BEFORE_UPDATE` $$
-USE `mydb`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`OFFRE_EMPLOI_BEFORE_UPDATE` BEFORE UPDATE ON `OFFRE_EMPLOI` FOR EACH ROW
+-- ============================================================
+-- Contrainte 2 : Lorsqu'une offre passe de ouverte à fermee,
+-- la date de fermeture est enregistrée automatiquement
+-- ============================================================
+CREATE TRIGGER OFFRE_EMPLOI_BEFORE_UPDATE
+BEFORE UPDATE ON OFFRE_EMPLOI
+FOR EACH ROW
 BEGIN
-   IF OLD.statut = 'ouverte' AND NEW.statut = 'fermee' THEN
+    IF OLD.statut = 'ouverte' AND NEW.statut = 'fermee' THEN
         SET NEW.date_fermeture = CURDATE();
-   END IF;
+    END IF;
 END$$
 
 
-USE `mydb`$$
-DROP TRIGGER IF EXISTS `CANDIDATURE_BEFORE_UPDATE` $$
-USE `mydb`$$
-CREATE DEFINER = CURRENT_USER TRIGGER `mydb`.`CANDIDATURE_BEFORE_UPDATE`
+-- ============================================================
+-- Contrainte 3 : Conservation des données non personnelles pour archive
+-- La suppression anonymise les données personnelles et bloque la suppression physique
+-- ============================================================
+CREATE TRIGGER CANDIDAT_BEFORE_DELETE
+BEFORE DELETE ON CANDIDAT
+FOR EACH ROW
+BEGIN
+    UPDATE PERSONNE
+    SET nom       = 'Anonyme',
+        prenom    = 'Anonyme',
+        adresse   = NULL,
+        telephone = NULL,
+        email     = NULL
+    WHERE id_personne = OLD.PERSONNE_id_personne;
+
+    SIGNAL SQLSTATE '45000'
+    SET MESSAGE_TEXT = 'Action bloquée : Données personnelles effacées (Archive conservée).';
+END$$
+
+
+-- ============================================================
+-- Contraintes 4 + 5 combinées (MySQL n'autorise qu'un seul
+-- BEFORE UPDATE par table)
+-- Contrainte 4 : Le candidat doit être disponible pour obtenir une offre
+-- Contrainte 5 : L'offre ne peut pas avoir déjà été obtenue par un autre candidat
+-- ============================================================
+CREATE TRIGGER CANDIDATURE_BEFORE_UPDATE
 BEFORE UPDATE ON CANDIDATURE
 FOR EACH ROW
 BEGIN
@@ -434,8 +237,42 @@ BEGIN
 END$$
 
 
-DELIMITER ;
+-- ============================================================
+-- Contrainte 6 : Procédure qui change le statut des candidats
+-- à disponible si leur emploi actuel est terminé
+-- ============================================================
+CREATE PROCEDURE update_disponibilite()
+BEGIN
+    UPDATE CANDIDAT c
+    SET c.disponibilite = 'disponible'
+    WHERE c.disponibilite = 'indisponible'
+      AND NOT EXISTS (
+          SELECT 1
+          FROM CANDIDATURE cand
+          JOIN OFFRE_EMPLOI o ON cand.OFFRE_EMPLOI_id_offre = o.id_offre
+          WHERE cand.CANDIDAT_id_candidat = c.id_candidat
+            AND cand.statut_candidature = 2
+            AND (o.date_fin IS NULL OR o.date_fin >= CURDATE())
+      );
+END$$
 
-SET SQL_MODE=@OLD_SQL_MODE;
-SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
-SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+-- ============================================================
+-- Contrainte 7 : Les candidats doivent avoir au moins 16 ans
+-- ============================================================
+CREATE TRIGGER CANDIDAT_BEFORE_INSERT
+BEFORE INSERT ON CANDIDAT
+FOR EACH ROW
+BEGIN
+    DECLARE age_candidat INT;
+    SELECT TIMESTAMPDIFF(YEAR, date_naissance, CURDATE()) INTO age_candidat
+    FROM PERSONNE
+    WHERE id_personne = NEW.PERSONNE_id_personne;
+
+    IF age_candidat < 16 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Erreur : Le candidat doit avoir au moins 16 ans.';
+    END IF;
+END$$
+
+DELIMITER ;
